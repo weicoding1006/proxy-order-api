@@ -1,0 +1,27 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Rider
+.idea/
+
+# dotnet user-secrets (stored in %APPDATA%, but just in case)
+secrets.json
+
+# Environment-specific settings (never commit real secrets)
+appsettings.Production.json
+appsettings.Local.json
+.env
+
+# NuGet
+*.nupkg
+packages/
+
+# OS
+.DS_Store
+Thumbs.db
