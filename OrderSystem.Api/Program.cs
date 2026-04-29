@@ -9,6 +9,7 @@ using OrderSystem.Domain.Entities;
 using OrderSystem.Infrastructure.Data;
 using OrderSystem.Infrastructure.Repositories;
 using Microsoft.OpenApi;
+using OrderSystem.Api.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,5 +87,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await RoleSeeder.SeedAsync(app.Services);
 
 app.Run();

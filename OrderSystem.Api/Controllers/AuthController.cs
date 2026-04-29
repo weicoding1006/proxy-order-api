@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -31,6 +32,8 @@ public class AuthController(
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
+        await userManager.AddToRoleAsync(user, "User");
+
         return Created(string.Empty, null);
     }
 
@@ -50,6 +53,25 @@ public class AuthController(
             expiresAt = DateTime.UtcNow.AddMinutes(
                 configuration.GetValue<int>("Jwt:ExpiresInMinutes"))
         });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<UserProfileResponse>> Me()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var user = await userManager.FindByIdAsync(userId!);
+        if (user is null)
+            return NotFound();
+
+        var roles = await userManager.GetRolesAsync(user);
+
+        return Ok(new UserProfileResponse(
+            user.Id,
+            user.Email!,
+            user.FirstName,
+            user.LastName,
+            roles));
     }
 
     private string GenerateJwt(ApplicationUser user, IList<string> roles)

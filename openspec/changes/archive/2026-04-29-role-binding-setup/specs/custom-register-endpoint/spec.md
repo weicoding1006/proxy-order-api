@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Custom user registration endpoint with profile fields
 The application SHALL expose `POST /api/auth/register` that accepts `{ email, password, firstName, lastName }` and creates a new `ApplicationUser` via `UserManager`. On success it SHALL return `201 Created` and the new user SHALL be automatically assigned the `User` role. On failure it SHALL return `400 Bad Request` with the list of Identity errors.
 
