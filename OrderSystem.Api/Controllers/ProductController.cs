@@ -37,7 +37,7 @@ public class ProductController(ProductService productService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [HttpPatch("{id:guid}")]
+    [HttpPut("{id:guid}")]
     public async Task<ActionResult<ProductResponseDto>> Update(Guid id, [FromBody] UpdateProductDto dto)
     {
         try

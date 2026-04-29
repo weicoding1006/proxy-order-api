@@ -22,8 +22,9 @@ public class OrderResponse
         {
             Id = i.Id,
             ProductId = i.ProductId,
+            Name = i.Product.Name,
             Quantity = i.Quantity,
-            UnitPrice = i.UnitPrice
+            UnitPrice = i.UnitPrice,
         }).ToList()
     };
 }

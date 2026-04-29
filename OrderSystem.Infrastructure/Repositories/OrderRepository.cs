@@ -17,11 +17,13 @@ public class OrderRepository(OrderDbContext context) : IOrderRepository
     public async Task<List<Order>> FindByUserIdAsync(string userId)
         => await context.Orders
             .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
             .Where(o => o.UserId == userId)
             .ToListAsync();
 
     public async Task<Order?> FindByIdAsync(Guid id)
         => await context.Orders
             .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.Id == id);
 }
