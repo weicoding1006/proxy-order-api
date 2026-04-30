@@ -10,6 +10,7 @@ public class ProductResponseDto
     public decimal Price { get; set; }
     public int Stock { get; set; }
     public bool IsActive { get; set; }
+    public List<ProductImageDto> Images { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
@@ -21,6 +22,10 @@ public class ProductResponseDto
         Price = product.Price,
         Stock = product.Stock,
         IsActive = product.IsActive,
+        Images = product.Images
+            .OrderBy(i => i.SortOrder)
+            .Select(ProductImageDto.FromEntity)
+            .ToList(),
         CreatedAt = product.CreatedAt,
         UpdatedAt = product.UpdatedAt
     };

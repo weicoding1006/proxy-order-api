@@ -7,6 +7,7 @@ namespace OrderSystem.Infrastructure.Data;
 public class OrderDbContext(DbContextOptions<OrderDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
     public DbSet<Product> Products { get; set; }
+    public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
 
@@ -20,6 +21,20 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : Identity
             entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+        });
+
+        builder.Entity<ProductImage>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.SortOrder).HasDefaultValue(0);
+            entity.Property(e => e.IsCover).HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
+
+            entity.HasOne(e => e.Product)
+                  .WithMany(p => p.Images)
+                  .HasForeignKey(e => e.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<Order>(entity =>

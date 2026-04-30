@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using OrderSystem.Application.DTOs;
 using OrderSystem.Application.Interfaces;
 using OrderSystem.Domain.Entities;
@@ -5,7 +6,7 @@ using OrderSystem.Domain.Exceptions;
 
 namespace OrderSystem.Application.Services;
 
-public class ProductService(IProductRepository repository)
+public class ProductService(IProductRepository repository, IFileStorageService fileStorage)
 {
     public async Task<List<ProductResponseDto>> FindAllAsync()
     {
@@ -64,5 +65,72 @@ public class ProductService(IProductRepository repository)
         var product = await repository.FindByIdAsync(id)
             ?? throw new ProductNotFoundException(id);
         await repository.DeleteAsync(product);
+    }
+
+    public async Task<ProductImageDto> UploadImageAsync(Guid productId, IFormFile file)
+    {
+        if (file.Length > 5 * 1024 * 1024)
+            throw new InvalidOperationException("Image file size must not exceed 5MB.");
+
+        var product = await repository.FindByIdAsync(productId)
+            ?? throw new ProductNotFoundException(productId);
+
+        var folder = $"uploads/products/{productId}";
+        var imageUrl = await fileStorage.SaveImageAsync(file, folder);
+
+        var isCover = !product.Images.Any();
+        var sortOrder = product.Images.Any() ? product.Images.Max(i => i.SortOrder) + 1 : 0;
+
+        var image = new ProductImage
+        {
+            Id = Guid.NewGuid(),
+            ProductId = productId,
+            ImageUrl = imageUrl,
+            IsCover = isCover,
+            SortOrder = sortOrder,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var created = await repository.AddImageAsync(image);
+        return ProductImageDto.FromEntity(created);
+    }
+
+    public async Task RemoveImageAsync(Guid productId, Guid imageId)
+    {
+        var image = await repository.FindImageByIdAsync(imageId)
+            ?? throw new ProductImageNotFoundException(imageId);
+
+        if (image.ProductId != productId)
+            throw new ProductImageNotFoundException(imageId);
+
+        var wasCover = image.IsCover;
+        fileStorage.DeleteImage(image.ImageUrl);
+        await repository.RemoveImageAsync(image);
+
+        if (wasCover)
+        {
+            var product = await repository.FindByIdAsync(productId);
+            var next = product?.Images.MinBy(i => i.SortOrder);
+            if (next is not null)
+            {
+                next.IsCover = true;
+                await repository.SaveChangesAsync();
+            }
+        }
+    }
+
+    public async Task<ProductImageDto> SetCoverImageAsync(Guid productId, Guid imageId)
+    {
+        var product = await repository.FindByIdAsync(productId)
+            ?? throw new ProductNotFoundException(productId);
+
+        var target = product.Images.FirstOrDefault(i => i.Id == imageId)
+            ?? throw new ProductImageNotFoundException(imageId);
+
+        foreach (var img in product.Images)
+            img.IsCover = img.Id == imageId;
+
+        await repository.SaveChangesAsync();
+        return ProductImageDto.FromEntity(target);
     }
 }

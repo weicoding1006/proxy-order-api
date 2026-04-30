@@ -10,6 +10,7 @@ using OrderSystem.Infrastructure.Data;
 using OrderSystem.Infrastructure.Repositories;
 using Microsoft.OpenApi;
 using OrderSystem.Api.Seeding;
+using OrderSystem.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<ProductService>();
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -82,7 +84,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+Directory.CreateDirectory(Path.Combine(builder.Environment.WebRootPath ?? "wwwroot", "uploads", "products"));
+
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

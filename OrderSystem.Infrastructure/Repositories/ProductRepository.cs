@@ -8,10 +8,14 @@ namespace OrderSystem.Infrastructure.Repositories;
 public class ProductRepository(OrderDbContext context) : IProductRepository
 {
     public async Task<List<Product>> FindAllAsync()
-        => await context.Products.ToListAsync();
+        => await context.Products
+            .Include(p => p.Images.OrderBy(i => i.SortOrder))
+            .ToListAsync();
 
     public async Task<Product?> FindByIdAsync(Guid id)
-        => await context.Products.FindAsync(id);
+        => await context.Products
+            .Include(p => p.Images.OrderBy(i => i.SortOrder))
+            .FirstOrDefaultAsync(p => p.Id == id);
 
     public async Task<Product> CreateAsync(Product product)
     {
@@ -33,4 +37,23 @@ public class ProductRepository(OrderDbContext context) : IProductRepository
         context.Products.Remove(product);
         await context.SaveChangesAsync();
     }
+
+    public async Task<ProductImage> AddImageAsync(ProductImage image)
+    {
+        context.ProductImages.Add(image);
+        await context.SaveChangesAsync();
+        return image;
+    }
+
+    public async Task<ProductImage?> FindImageByIdAsync(Guid imageId)
+        => await context.ProductImages.FindAsync(imageId);
+
+    public async Task RemoveImageAsync(ProductImage image)
+    {
+        context.ProductImages.Remove(image);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task SaveChangesAsync()
+        => await context.SaveChangesAsync();
 }

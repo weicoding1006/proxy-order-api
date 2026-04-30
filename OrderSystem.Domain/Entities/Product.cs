@@ -25,4 +25,6 @@ public class Product
 
     /// <summary>商品最後更新時間</summary>
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<ProductImage> Images { get; set; } = [];
 }
