@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using OrderSystem.Domain.Entities;
+using OrderSystem.Domain.Enums;
 
 namespace OrderSystem.Infrastructure.Data;
 
@@ -21,6 +22,7 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : Identity
             entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.RowVersion).IsRowVersion();
         });
 
         builder.Entity<ProductImage>(entity =>
@@ -41,7 +43,10 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : Identity
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18,2)");
-            entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Status)
+                  .IsRequired()
+                  .HasMaxLength(50)
+                  .HasConversion<string>();
 
             entity.HasOne(e => e.User)
                   .WithMany(u => u.Orders)

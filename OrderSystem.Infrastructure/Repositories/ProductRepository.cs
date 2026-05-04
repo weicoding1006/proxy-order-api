@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OrderSystem.Application.Interfaces;
 using OrderSystem.Domain.Entities;
+using OrderSystem.Domain.Exceptions;
 using OrderSystem.Infrastructure.Data;
 
 namespace OrderSystem.Infrastructure.Repositories;
@@ -56,4 +57,20 @@ public class ProductRepository(OrderDbContext context) : IProductRepository
 
     public async Task SaveChangesAsync()
         => await context.SaveChangesAsync();
+
+    public async Task UpdateReservedStockAsync(Guid productId, int delta)
+    {
+        var product = await context.Products.FindAsync(productId)
+            ?? throw new ProductNotFoundException(productId);
+
+        try
+        {
+            product.ReservedStock += delta;
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new InsufficientStockException(product.Name, product.Stock - product.ReservedStock, 0);
+        }
+    }
 }

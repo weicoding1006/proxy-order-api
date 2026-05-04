@@ -16,7 +16,7 @@ public class OrderResponse
         Id = order.Id,
         UserId = order.UserId,
         TotalAmount = order.TotalAmount,
-        Status = order.Status,
+        Status = order.Status.ToString(),
         CreatedAt = order.CreatedAt,
         Items = order.OrderItems.Select(i => new OrderItemResponse
         {

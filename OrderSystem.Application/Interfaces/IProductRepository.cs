@@ -14,4 +14,6 @@ public interface IProductRepository
     Task<ProductImage?> FindImageByIdAsync(Guid imageId);
     Task RemoveImageAsync(ProductImage image);
     Task SaveChangesAsync();
+
+    Task UpdateReservedStockAsync(Guid productId, int delta);
 }

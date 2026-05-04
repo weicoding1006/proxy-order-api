@@ -59,4 +59,40 @@ public class OrdersController(OrderService orderService) : ControllerBase
             return NotFound();
         return Ok(order);
     }
+
+    [HttpGet("status/enums")]
+    public ActionResult<List<string>> GetStatusEnums()
+    {
+        // var statuses = Enum.GetNames<Domain.Enums.OrderStatus>().ToList();
+        //需要改key value
+        var statusDict = Enum.GetValues<Domain.Enums.OrderStatus>()
+            .Cast<Domain.Enums.OrderStatus>()
+            .ToDictionary(s => s.ToString(), s => (int)s);
+        return Ok(statusDict);
+    }
+
+    [HttpPut("{id:guid}/status")]
+    public async Task<ActionResult<OrderResponse>> UpdateStatus(
+        Guid id, [FromBody] UpdateOrderStatusRequest dto)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var isAdmin = User.IsInRole("Admin");
+        try
+        {
+            var order = await orderService.UpdateStatusAsync(id, dto.Status, userId, isAdmin);
+            return Ok(order);
+        }
+        catch (OrderNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (InvalidOrderStatusTransitionException ex)
+        {
+            return UnprocessableEntity(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+    }
 }

@@ -17,6 +17,12 @@ public class Product
     /// <summary>庫存數量</summary>
     public int Stock { get; set; }
 
+    /// <summary>已保留但尚未正式扣除的庫存（Pending 訂單佔用）</summary>
+    public int ReservedStock { get; set; } = 0;
+
+    /// <summary>樂觀並發控制版本戳記</summary>
+    public byte[] RowVersion { get; set; } = [];
+
     /// <summary>是否上架（預設：true 上架中）</summary>
     public bool IsActive { get; set; } = true;
 

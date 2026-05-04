@@ -1,3 +1,5 @@
+using OrderSystem.Domain.Enums;
+
 namespace OrderSystem.Domain.Entities;
 
 public class Order
@@ -15,7 +17,7 @@ public class Order
     public decimal TotalAmount { get; set; }
 
     /// <summary>訂單狀態（預設：Pending 待處理）</summary>
-    public string Status { get; set; } = "Pending";
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
     /// <summary>訂單建立時間</summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
