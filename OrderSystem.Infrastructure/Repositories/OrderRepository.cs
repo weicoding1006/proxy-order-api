@@ -26,4 +26,11 @@ public class OrderRepository(OrderDbContext context) : IOrderRepository
             .Include(o => o.OrderItems)
                 .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.Id == id);
+
+    public Task<List<Order>> FindAllAsync()
+        => context.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(i => i.Product)
+            .ToListAsync();
+
 }

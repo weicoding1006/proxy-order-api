@@ -51,10 +51,16 @@ public class OrderService(IOrderRepository orderRepository, IProductRepository p
         return orders.Select(OrderResponse.FromEntity).ToList();
     }
 
-    public async Task<OrderResponse?> FindOneAsync(Guid id, string userId)
+    public async Task<List<OrderResponse>> FindAllAsync()
+    {
+        var orders = await orderRepository.FindAllAsync();
+        return orders.Select(OrderResponse.FromEntity).ToList();
+    }
+
+    public async Task<OrderResponse?> FindOneAsync(Guid id)
     {
         var order = await orderRepository.FindByIdAsync(id);
-        if (order is null || order.UserId != userId)
+        if (order is null)
             return null;
         return OrderResponse.FromEntity(order);
     }

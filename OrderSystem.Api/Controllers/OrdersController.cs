@@ -36,18 +36,25 @@ public class OrdersController(OrderService orderService) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<OrderResponse>>> GetAll()
+    public async Task<ActionResult<List<OrderResponse>>> GetAllById()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var orders = await orderService.FindByUserIdAsync(userId);
         return Ok(orders);
     }
 
+    [HttpGet("all")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<List<OrderResponse>>> GetAll()
+    {
+        var orders = await orderService.FindAllAsync();
+        return Ok(orders);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<OrderResponse>> GetById(Guid id)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var order = await orderService.FindOneAsync(id, userId);
+        var order = await orderService.FindOneAsync(id);
         if (order is null)
             return NotFound();
         return Ok(order);
