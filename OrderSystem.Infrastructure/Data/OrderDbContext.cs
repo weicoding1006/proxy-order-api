@@ -11,6 +11,8 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : Identity
     public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -63,6 +65,35 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : Identity
                   .WithMany(o => o.OrderItems)
                   .HasForeignKey(e => e.OrderId)
                   .IsRequired();
+
+            entity.HasOne(e => e.Product)
+                  .WithMany()
+                  .HasForeignKey(e => e.ProductId)
+                  .IsRequired();
+        });
+
+        builder.Entity<Cart>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId).IsUnique();
+
+            entity.HasOne(e => e.User)
+                  .WithOne(u => u.Cart)
+                  .HasForeignKey<Cart>(e => e.UserId)
+                  .IsRequired()
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<CartItem>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.CartId, e.ProductId }).IsUnique();
+            entity.ToTable(t => t.HasCheckConstraint("CK_CartItems_Quantity", "\"Quantity\" >= 1"));
+
+            entity.HasOne(e => e.Cart)
+                  .WithMany(c => c.CartItems)
+                  .HasForeignKey(e => e.CartId)
+                  .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(e => e.Product)
                   .WithMany()

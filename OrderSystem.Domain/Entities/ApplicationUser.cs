@@ -15,4 +15,7 @@ public class ApplicationUser : IdentityUser
 
     /// <summary>該使用者的所有訂單（一對多）</summary>
     public ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    /// <summary>該使用者的購物車（一對一）</summary>
+    public Cart? Cart { get; set; }
 }
