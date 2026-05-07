@@ -25,3 +25,6 @@ packages/
 # OS
 .DS_Store
 Thumbs.db
+
+# User-uploaded files (served at runtime, not version-controlled)
+OrderSystem.Api/wwwroot/uploads/
